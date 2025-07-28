@@ -4,6 +4,14 @@ param(
     [Parameter(Mandatory)]
     [string]$TargetPath,
 
+    # Output path (directory/file)
+    [Parameter()]
+    [string]$OutputPath = $(Get-Location),
+
+    # Target framework, is directly written to the XML
+    [Parameter()]
+    [string]$TargetFramework = "",
+
     # Allow examination of files that do not end with "dll" (case-insensitive)
     [Parameter()]
     [switch]$AllowNonDllFiles,
@@ -58,8 +66,8 @@ function Cleanse-Version {
     }
 }
 
+
 # Enable debug output without script halting
-echo $Debug
 if ($PSBoundParameters.ContainsKey('Debug')) {
     $DebugPreference = 'Continue'
 }
@@ -77,7 +85,12 @@ try {
 }
 
 # Define the final output path
-$finalOutputPath = Join-Path -Path (Get-Location) -ChildPath 'packages.config'
+$OutputObject = Get-Item $OutputPath
+if ($OutputObject.PSIsContainer) {
+    $finalOutputPath = Join-Path -Path $OutputObject.FullName -ChildPath 'packages.config'
+} else {
+      $finalOutputPath = $OutputObject.FullName
+}
 
 # Create an XmlWriter for the packages.config output
 $xmlWriter = New-Object System.Xml.XmlTextWriter($temporaryOutputPath, $null)
@@ -138,6 +151,7 @@ foreach ($file in $files) {
     $xmlWriter.WriteStartElement('package')
     $xmlWriter.WriteAttributeString('id', $packageName)
     $xmlWriter.WriteAttributeString('version', $finalPackageVersion)
+    $xmlWriter.WriteAttributeString('targetFramework', $TargetFramework)
     $xmlWriter.WriteEndElement()
 }
 
@@ -151,52 +165,3 @@ $xmlWriter.Close()
 # Move the temporary file to its final destination
 Write-Debug ("Moving temporary file to '{0}'." -f $finalOutputPath)
 Move-Item -Path $temporaryOutputPath -Destination $finalOutputPath -Force
-
-# SIG # Begin signature block
-# MIIIkQYJKoZIhvcNAQcCoIIIgjCCCH4CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
-# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUI16Ej7t95n7aUbECGVTmzEDn
-# j1mgggUgMIIFHDCCAwSgAwIBAgIQZV3hw2UslqpHEPQ9zVxk1jANBgkqhkiG9w0B
-# AQsFADAmMSQwIgYDVQQDDBtwb3dlcnNoZWxsLnNpZ25pbmcud29iZWVjb24wHhcN
-# MjUwNzIxMjA0MDUyWhcNMzUwNzIxMjA1MDUyWjAmMSQwIgYDVQQDDBtwb3dlcnNo
-# ZWxsLnNpZ25pbmcud29iZWVjb24wggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIK
-# AoICAQDInsuSBnNYpeuL8TQ9AYblnXA+GLtO2Sdw9Fh5GTqKTikoBpULWXkOzS1a
-# pZN+Kvk/dm8bjKYR36ow2CEvC7/m6ozWyUVjSvIajzqt1rj2kZDBE80Dtu8m8VHb
-# sfDxD5FccTkmrRjz7zDs/nkbEQ0A1RxuQSFM+0knYi64OHoaPRmtDuevMhS/UuF8
-# RGLgIov0SdAFiUmhXBJ3HM7kewwUg2U8+FDJPTN5Wn4kZR1hQo0n9qqtKkHE+m8O
-# jTinzOkkZcoa+is64xXrSAaJ0rtlwrm0UgFpNB+u1ccwZseFX0+MSgE/78Z/qxKa
-# K171QBijWZ2+oCLZ8oa3UXMcF3xZHvrF+/zps7JWJsi4UvB7l1/NEVrXTyMVZjYK
-# Q4GIN3rZl+Ndh/Xcd+9+G2Ipe0sqpfCiiRlL7y/3Ro8hEUu/fJ/5jlx+j5iVhYll
-# 2W7flqhMKLTwUK88my1Z3c3WRhjbiH9I1091ADg5zhbhB/I3knIouN+OnAeJ47j4
-# N9IRNWi+2D/DNYyMuqIYh/yCejYIs6g3vWeX5RbpoaGcq2qsNC5jB17x9b7BwhUw
-# QPOmH7AQzajFqPs0iJeFT/x+dcYvykQEbu4biBLFDspmvfCLFCEeOc/ESCcMuK9g
-# TLrmTP0UF7N1zD1P37BMqVLxMK60gYeA7h0q0hmArfINLPU2JQIDAQABo0YwRDAO
-# BgNVHQ8BAf8EBAMCB4AwEwYDVR0lBAwwCgYIKwYBBQUHAwMwHQYDVR0OBBYEFNnH
-# oT4r4TaGGCUghcxWA/a4B5dNMA0GCSqGSIb3DQEBCwUAA4ICAQArONIC4MIbKsHj
-# valMPGI8SJiMex4Kz3adiCAS37WXpzBVJnGjMpNtDAzogwE7i3JTGS5LE/Bwjo/R
-# CmWykjpBhJhQTMUJkO4QxN1S21UXnG1nC6S07NkuWP/bClC3umk7ypCU/mA7jjcA
-# ksKyf7YY23kt4Dq8jC9vKUJiB9jhCa1kxJ7zW/ym+rBKq6rX2NUWqzUIGTGhLlq7
-# CiKHAiA+WzHF7y3bLJU+tB+qNM2FMfAAB3ING68sZF6wxtXfdoipur9Oq7180HCP
-# FzcOjSiz9S3T6ab8B9rxwAFPnmAvNYeapEo1W+PhMbjcUYSf58i5kChc07Fjj+2U
-# NZ8Orh3UqOx4k72RysFT1f3jGsfC+BhP9AI0wyVUsh3I5NPHcZCJzivXb9TGeaPY
-# hr/CGiNLqNIj6mASYyGOKNQ4sdphW71/RSojN2LmzKVGVhHpo6WER0CYOJU06PpH
-# SmJ/3hL9yUsKuHS6EKD+uxD32Nh8BrieTbNJ75uJZbVAoBG/edyt5ANSbrK0FeT5
-# djsOqxfVB5sKGK5CW/B0Kz62z43Nv7Wm0wJL702HCjHs/CsoR+YKPhAJew6wRn3A
-# pY1EEE9Wp3MaeXLHYJGs6DC6GuuiyUZP1TzK3VV/cKPEogUUblklF1HRyPL1dFTZ
-# zkV5ikxn5F+P0kUS30ohghnPD614RDGCAtswggLXAgEBMDowJjEkMCIGA1UEAwwb
-# cG93ZXJzaGVsbC5zaWduaW5nLndvYmVlY29uAhBlXeHDZSyWqkcQ9D3NXGTWMAkG
-# BSsOAwIaBQCgeDAYBgorBgEEAYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJ
-# AzEMBgorBgEEAYI3AgEEMBwGCisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMG
-# CSqGSIb3DQEJBDEWBBTAi4Y+jbV0uZy6Z/AQ0oqP/8uEtDANBgkqhkiG9w0BAQEF
-# AASCAgA2SetLcjIGcNXxq6j05OAHiSjV7juJrWSvQLFkCViDtuA4CytfIXrfu9Gl
-# HbhpzqKHWDhXqyZhirWEHtuFuiz18KLVS0KHJsxWieio3It91dqkZbWDBmg9xWBB
-# vQsGIvW91txzkDmarWHRtTlhHh8uePMmOH0PV0DCoetSvuk6Tti5Xi9b4MgYi5rr
-# FGZbmpYZ+/vuY+I76kXDYFGokVdklARfiNWh0LJwFmi4slzpHIHw4UsvwCRqzYik
-# McENXnHHsD9UvjORjzRnfxls6tsAMa0z66FEoJsL0QkThyAo42y/jOL+6mB7jKpS
-# 1hzSRwF8vLN/gEVJyhS/oLM3Tb0l4IyZ8nHziZIR3xivXZPrhQstAnUXytsl4TG2
-# si+eT8hujmv9jvNbFdNoWYAcrMawyHO2inCaSnOJJNdf0BFReMDtLLovo1rVnOdu
-# 6e+flYmH+z6moOLFSL/XBBKK/7RuKTcJnu3gVCPtnuiylwyZRRtMEdBUcoEApbDt
-# V999VOimFyyVghT0t4BM4KBiziowkFm4r9+wUv0Q3AC6FG9eGJXFTZZTmwgXHJsl
-# NoF/erGu+Uy8PBq3V4M3I0InCNzdXrXmMjNkb9ZQiGY+FC/LmumNKZ66hbXqgSip
-# PxQuJMtgm99lIjA+Hr/3ECyzi56b1WOmu+zKpakTZ6E0IznouA==
-# SIG # End signature block
