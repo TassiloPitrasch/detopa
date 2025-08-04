@@ -4,6 +4,5 @@
 # ... besided
 !.gitignore
 !detopa.ps1
-!detopa.exe
 !LICENSE
 !README.md
