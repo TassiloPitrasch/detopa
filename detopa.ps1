@@ -1,7 +1,24 @@
-﻿# Parameters
+﻿<#
+.SYNOPSIS
+
+Detopa - DLLs to packages.config
+
+.DESCRIPTION
+
+see https://github.com/TassiloPitrasch/detopa/issues
+
+.NOTES
+
+    Author: Tassilo Pitrasch
+    Version: 0.0.3
+    License: MIT
+
+#>
+
+# Parameters
 param(
     # Path to the resources to be examined
-    [Parameter(Mandatory)]
+    [Parameter()]
     [string]$TargetPath,
 
     # Output path (directory/file)
@@ -36,7 +53,11 @@ param(
 
     # Ignore the build section if it's empty or consists only of zeros
     [Parameter()]
-    [switch]$IgnoreEmptyBuild
+    [switch]$IgnoreEmptyBuild,
+
+    # Output version info
+    [Parameter()]
+    [switch]$Version
 )
 
 
@@ -72,7 +93,21 @@ if ($PSBoundParameters.ContainsKey('Debug')) {
     $DebugPreference = 'Continue'
 }
 
-# Retrieve the target files				 
+if ($Version) {
+    $notes = (Get-Help $MyInvocation.InvocationName).alertset | Out-String
+    if ($notes -match 'Version:\s*([\d\.]+)') {
+        Write-Output $matches[1]
+    } else {
+        Write-Output "Version could not be parsed."
+    }
+    exit
+}
+
+if ([string]::IsNullOrEmpty($TargetPath)) {
+    throw [System.ArgumentException] "Parameter 'TargetPath' is required."
+}
+
+# Retrieve the target files
 $files = Get-ChildItem -Path $TargetPath
 
 # Create a temporary file path for XML output
