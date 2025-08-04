@@ -18,6 +18,7 @@ See the following table for command-line options:
 | NumericVersion | Remove non-digit components from the version. Usually increases the quality of the entries | False | False |
 | IgnoreBuild |  Ignore the build section of a version. Increases the quality of the entries | False | False |
 | IgnoreEmptyBuild | Ignore the build section if it's empty or consists only of zeros. Increases the quality of the affected entries | False | False |
+| Version | Displays the version of the script and exits afterwards | False | False |
 
 Examples for the last three options:
  - `1.0.0A.0+b13234` becomes `1.0.0.0` with `-NumericVersion`
