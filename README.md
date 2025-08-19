@@ -5,7 +5,7 @@ detopa is a small Powershell-script to generate a `packages.config`-file directl
 **TL;DR: detopa is useful to generate a first overview of the dependencies of a csharp project.**
 Originally, the idea was to have an adapter to the great [cdxgen](https://github.com/CycloneDX/cdxgen), which creates SBOMs (Software Bill of Materials) for all kinds of projects, programming languages and tools. However, it struggled to produce meaningful output when supplied with just a bunch of DLLs. detopa bridges that gap by generating a `packages.config`-file, which can be picked up by cdxgen for further analysis.
 ## How is detopa?
-Just run the script. Make sure to allow the execution of "self-signed" scripts. Alternatively, use the executable included in the assets of each release. 
+Just run the script. Make sure to allow the execution of "self-signed" scripts. Alternatively, use the executable included in the assets of each release. Note that the executable can not handle multiple values `TargetPath`.
 See the following table for command-line options:
 | Flag | Description | Default | Required |
 |--|--|--|--|

@@ -18,7 +18,7 @@ see https://github.com/TassiloPitrasch/detopa/issues
 # Parameters
 param(
     # Path(s) to the resources to be examined
-    [Parameter()][String[]]$TargetPaths,
+    [Parameter()][String[]]$TargetPath,
 
     # Output path (directory/file)
     [Parameter()]
@@ -95,17 +95,17 @@ function Cleanse-Version {
 function Examine-Target-Path {
     param(
         [Parameter(Mandatory)]
-        [string]$TargetPath
+        [string]$Target
     )
 
     # If duplicates are not to be removed from the output file,
     # a comment is added identifying each target
     if (-not $RemoveDuplicates) {
-        $xmlWriter.WriteComment($TargetPath)
+        $xmlWriter.WriteComment($Target)
     }
 
     # Retrieve the target files
-    $files = Get-ChildItem -Path $TargetPath
+    $files = Get-ChildItem -Path $Target
 
     # Process files one-by-one
     foreach ($file in $files) {
@@ -156,13 +156,14 @@ function Examine-Target-Path {
         # Skipping duplicates (if enabled)
         $packageIdentifier = "{0}/{1}" -f $packageName, $finalPackageVersion
         if ($examinedPackages[$packageIdentifier]) {
+            Write-Debug ("Skipping duplicate package '{0}'." -f $packageIdentifier)
             continue
         } else {
             $examinedPackages[$packageIdentifier] = $RemoveDuplicates
         }
 
         # Write package entry to XML
-        Write-Debug ("Writing package '{0}/{1}' to output." -f $packageName, $finalPackageVersion)
+        Write-Debug ("Writing package '{0}' to output." -f $packageIdentifier)
         $xmlWriter.WriteStartElement('package')
         $xmlWriter.WriteAttributeString('id', $packageName)
         $xmlWriter.WriteAttributeString('version', $finalPackageVersion)
@@ -220,9 +221,9 @@ $examinedPackages = @{}
 
 
 # Examine each target path
-foreach ($TargetPath in $TargetPaths)  {
-    Write-Debug ("Examining path '{0}'." -f $TargetPath)
-    Examine-Target-Path $TargetPath
+foreach ($Target in $TargetPath)  {
+    Write-Debug ("Examining path '{0}'." -f $Target)
+    Examine-Target-Path $Target
 }
 
 # Finalize the XML document
