@@ -22,7 +22,7 @@ param(
 
     # Output path (directory/file)
     [Parameter()]
-    [string]$OutputPath = $(Get-Location),
+    [string]$OutputPath = "packages.config",
 
     # Target framework, is directly written to the XML
     [Parameter()]
@@ -201,12 +201,10 @@ try {
 }
 
 # Define the final output path
-$OutputObject = Get-Item $OutputPath
-if ($OutputObject.PSIsContainer) {
-    $finalOutputPath = Join-Path -Path $OutputObject.FullName -ChildPath 'packages.config'
-} else {
-      $finalOutputPath = $OutputObject.FullName
+if ($OutputPath.EndsWith("\")) {
+    $OutputPath = Join-Path -Path $OutputPath -ChildPath 'packages.config'
 }
+$finalOutputPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($OutputPath)
 
 # Create an XmlWriter for the packages.config output
 $xmlWriter = New-Object System.Xml.XmlTextWriter($temporaryOutputPath, $null)

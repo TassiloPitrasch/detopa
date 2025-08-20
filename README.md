@@ -11,7 +11,7 @@ See the following table for command-line options:
 | Flag | Description | Default | Required |
 |--|--|--|--|
 | TargetPath | Path to the resources to be examined. Can be a single file or a directory. Supports standard Windows wildcards and allows multiple values | - | True |
-| OutputPath | File/directory the output is written to. | `packages.config` in the current working directory | False |
+| OutputPath | File/directory the output is written to. Provide a directory by adding a trailing back-slash to the path. Directories must exist beforehand | `packages.config` in the current working directory | False |
 | TargetFramework | Target framework as defined in [target-frameworks](https://learn.microsoft.com/en-us/nuget/reference/target-frameworks) | "" | False |
 | AllowNonDllFiles | Allows the analysis of non DLL-files, which are skipped by default. Use at own risk, might cause severe decrease of performance | False | False |
 | UseBasename | Fallback option to use the local filename for a package if the actual name could not be parsed from the metadata. Risk of many incorrect entries in `packages.config` | False | False |
